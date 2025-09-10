@@ -12,11 +12,6 @@
       "destination": "/index.html"
     }
   ],
-  "env": {
-    "VITE_TMDB_API_KEY": "@v_tmdb_api_key",
-    "VITE_FIREWORK_API_KEY": "@v_firework_api_key",
-    "VITE_DOBBY_MODEL": "@v_dobby_model"
-  },
   "regions": ["iad1"],
   "headers": [
     {
