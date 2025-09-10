@@ -1,0 +1,28 @@
+{
+  "name": "dobby-movie-wizard",
+  "version": "1.0.0",
+  "description": "AI-powered movie recommendation web application",
+  "main": "index.html",
+  "scripts": {
+    "dev": "serve .",
+    "build": "echo 'No build step required for static site'",
+    "start": "serve .",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "movie",
+    "recommendation",
+    "ai",
+    "tmdb",
+    "vercel"
+  ],
+  "author": "Dobby Movie Wizard",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1",
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
