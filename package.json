@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "dev": "serve .",
-    "build": "echo 'No build step required for static site'",
+    "build": "node build.js",
     "start": "serve .",
     "deploy": "vercel --prod"
   },
