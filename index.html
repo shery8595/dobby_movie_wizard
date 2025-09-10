@@ -842,9 +842,9 @@
   <!-- Environment Variables (injected by Vercel during build) -->
   <script>
     // Environment variables injected by Vercel during build process
-    window.VITE_TMDB_API_KEY = '%VITE_TMDB_API_KEY%';
-    window.VITE_FIREWORK_API_KEY = '%VITE_FIREWORK_API_KEY%';
-    window.VITE_DOBBY_MODEL = '%VITE_DOBBY_MODEL%';
+    window.VITE_TMDB_API_KEY = 'VITE_TMDB_API_KEY';
+    window.VITE_FIREWORK_API_KEY = 'VITE_FIREWORK_API_KEY';
+    window.VITE_DOBBY_MODEL = 'VITE_DOBBY_MODEL';
 
     // Function to validate environment variables
     function validateEnvironmentVariables() {
@@ -854,12 +854,10 @@
 
       // Check if placeholders weren't replaced or values are missing
       if (!tmdbKey || !fireworkKey || !dobbyModel ||
-          tmdbKey.includes('%') || fireworkKey.includes('%') || dobbyModel.includes('%') ||
+          tmdbKey.startsWith('VITE_') || fireworkKey.startsWith('VITE_') || dobbyModel.startsWith('VITE_') ||
           tmdbKey === 'undefined' || fireworkKey === 'undefined' || dobbyModel === 'undefined') {
         console.error('❌ Environment variables not properly configured!');
         console.error('Please set VITE_TMDB_API_KEY, VITE_FIREWORK_API_KEY, and VITE_DOBBY_MODEL in Vercel dashboard');
-        // Disable the app functionality
-        document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial,sans-serif;"><h1>Configuration Error</h1><p>Environment variables are not properly configured. Please contact the administrator.</p></div>';
         return false;
       } else {
         console.log('✅ Environment variables loaded successfully');
@@ -867,8 +865,18 @@
       }
     }
 
-    // Validate environment variables
-    validateEnvironmentVariables();
+    // Debug: Log what values we have
+    console.log('🔍 Debug - Environment variables in browser:');
+    console.log('VITE_TMDB_API_KEY:', window.VITE_TMDB_API_KEY);
+    console.log('VITE_FIREWORK_API_KEY:', window.VITE_FIREWORK_API_KEY);
+    console.log('VITE_DOBBY_MODEL:', window.VITE_DOBBY_MODEL);
+
+    // Validate environment variables (don't replace DOM if validation fails)
+    const envValid = validateEnvironmentVariables();
+    if (!envValid) {
+      // Stop execution if environment variables are not configured
+      throw new Error('Environment variables not configured. Please check Vercel dashboard settings.');
+    }
   </script>
 
   <!-- ========== Script (logic) ========== -->
