@@ -2,14 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
-      "use": "@vercel/static"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": ".",
+        "buildCommand": "node build.js"
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/$1"
     }
   ],
   "regions": ["iad1"],
@@ -31,5 +35,10 @@
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "VITE_TMDB_API_KEY": "@v_tmdb_api_key",
+    "VITE_FIREWORK_API_KEY": "@v_firework_api_key",
+    "VITE_DOBBY_MODEL": "@v_dobby_model"
+  }
 }
