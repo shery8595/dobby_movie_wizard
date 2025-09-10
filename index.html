@@ -1,3 +1,7 @@
+//Export Options: Save recommendations to calendar, notes, or social media
+//Director/Actor Search: Find movies by favorite creators
+//Movie Countdown: Track upcoming releases
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -835,53 +839,57 @@
   <!-- Toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"><i class="fas fa-check-circle"></i><div id="toast-text">Added</div></div>
 
-  <!-- Environment Variables Loader -->
+  <!-- Environment Variables (injected by Vercel during build) -->
   <script>
-    // Load environment variables from API
-    async function loadEnvironmentVariables() {
-      try {
-        const response = await fetch('/api/config');
-        const envVars = await response.json();
+    // Environment variables injected by Vercel during build process
+    window.VITE_TMDB_API_KEY = '%VITE_TMDB_API_KEY%';
+    window.VITE_FIREWORK_API_KEY = '%VITE_FIREWORK_API_KEY%';
+    window.VITE_DOBBY_MODEL = '%VITE_DOBBY_MODEL%';
 
-        // Set environment variables on window object
-        window.VITE_TMDB_API_KEY = envVars.TMDB_API_KEY;
-        window.VITE_FIREWORK_API_KEY = envVars.FIREWORK_API_KEY;
-        window.VITE_DOBBY_MODEL = envVars.DOBBY_MODEL;
+    // Function to validate environment variables
+    function validateEnvironmentVariables() {
+      const tmdbKey = window.VITE_TMDB_API_KEY;
+      const fireworkKey = window.VITE_FIREWORK_API_KEY;
+      const dobbyModel = window.VITE_DOBBY_MODEL;
 
+      // Check if placeholders weren't replaced or values are missing
+      if (!tmdbKey || !fireworkKey || !dobbyModel ||
+          tmdbKey.includes('%') || fireworkKey.includes('%') || dobbyModel.includes('%') ||
+          tmdbKey === 'undefined' || fireworkKey === 'undefined' || dobbyModel === 'undefined') {
+        console.error('❌ Environment variables not properly configured!');
+        console.error('Please set VITE_TMDB_API_KEY, VITE_FIREWORK_API_KEY, and VITE_DOBBY_MODEL in Vercel dashboard');
+        // Disable the app functionality
+        document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial,sans-serif;"><h1>Configuration Error</h1><p>Environment variables are not properly configured. Please contact the administrator.</p></div>';
+        return false;
+      } else {
         console.log('✅ Environment variables loaded successfully');
-      } catch (error) {
-        console.warn('⚠️ Failed to load environment variables from API, using fallbacks:', error);
-
-        // Fallback values for development/local testing
-        window.VITE_TMDB_API_KEY = '752897c8ff8f7c2f4506c0293df280a7';
-        window.VITE_FIREWORK_API_KEY = 'fw_3ZL5KPdymkEXgjmQgUz2yVRL';
-        window.VITE_DOBBY_MODEL = 'accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new';
+        return true;
       }
     }
 
-    // Load environment variables before initializing the app
-    loadEnvironmentVariables();
+    // Validate environment variables
+    validateEnvironmentVariables();
   </script>
 
   <!-- ========== Script (logic) ========== -->
   <script>
     // -------------------------
-    // Config (using environment variables with fallback)
+    // Config (using environment variables - no fallbacks)
     // -------------------------
     // Get environment variables from window object (injected by server)
     const TMDB_API_KEY = window.VITE_TMDB_API_KEY;
     const FIREWORK_API_KEY = window.VITE_FIREWORK_API_KEY;
     const DOBBY_MODEL = window.VITE_DOBBY_MODEL;
 
-    // Fallback values for development
-    const TMDB_API_KEY_FALLBACK = '752897c8ff8f7c2f4506c0293df280a7';
-    const FIREWORK_API_KEY_FALLBACK = 'fw_3ZL5KPdymkEXgjmQgUz2yVRL';
-    const DOBBY_MODEL_FALLBACK = 'accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new';
+    // Validate that all required environment variables are present
+    if (!TMDB_API_KEY || !FIREWORK_API_KEY || !DOBBY_MODEL) {
+      throw new Error('Missing required environment variables. Please configure VITE_TMDB_API_KEY, VITE_FIREWORK_API_KEY, and VITE_DOBBY_MODEL');
+    }
 
-    // Use fallback if environment variables are not available
-    const TMDB_API_KEY_FINAL = TMDB_API_KEY || TMDB_API_KEY_FALLBACK;
-    const FIREWORK_API_KEY_FINAL = FIREWORK_API_KEY || FIREWORK_API_KEY_FALLBACK;
-    const DOBBY_MODEL_FINAL = DOBBY_MODEL || DOBBY_MODEL_FALLBACK;
+    // Use environment variables directly (no fallbacks)
+    const TMDB_API_KEY_FINAL = TMDB_API_KEY;
+    const FIREWORK_API_KEY_FINAL = FIREWORK_API_KEY;
+    const DOBBY_MODEL_FINAL = DOBBY_MODEL;
 
     // -------------------------
     // App state
@@ -1675,12 +1683,10 @@ Please return only the movie titles in a comma-separated list.`;
     }
 
     // -------------------------
-    // Init on load (wait for environment variables)
+    // Init on load
     // -------------------------
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Wait for environment variables to be loaded
-      await loadEnvironmentVariables();
-      // Then initialize the app
+    document.addEventListener('DOMContentLoaded', () => {
+      // Environment variables are already injected during build
       init();
     });
   </script>
