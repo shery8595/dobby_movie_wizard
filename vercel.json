@@ -17,7 +17,6 @@
     "VITE_FIREWORK_API_KEY": "@v_firework_api_key",
     "VITE_DOBBY_MODEL": "@v_dobby_model"
   },
-  "functions": {},
   "regions": ["iad1"],
   "headers": [
     {
