@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dobby Movie Wizard — Professional Edition</title>
+
+  <!-- Icons & Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================
+       Theme variables & reset
+       ========================== */
+    :root{
+      --bg-100: #071024;
+      --bg-200: #0f172a;
+      --surface: rgba(255,255,255,0.03);
+      --glass: rgba(255,255,255,0.04);
+      --muted: #9aa7c0;
+      --accent: #7c5cff;
+      --accent-2: #ff5e7a;
+      --success: #10b981;
+      --danger: #ef4444;
+      --card-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      --glass-border: rgba(255,255,255,0.05);
+      --radius: 14px;
+      --gap: 16px;
+      --transition: 300ms cubic-bezier(.2,.9,.3,1);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(1000px 600px at 10% 10%, rgba(124,92,255,0.08), transparent 8%),
+                  radial-gradient(1000px 600px at 90% 90%, rgba(255,94,122,0.04), transparent 8%),
+                  linear-gradient(180deg,var(--bg-100), var(--bg-200));
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+    }
+
+    /* ==========================
+       Layout
+       ========================== */
+    .container{max-width:1200px;margin:0 auto}
+    header.topbar{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .brand .logo{
+      width:48px;height:48px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,var(--accent), #5b3bff);
+      box-shadow:0 6px 20px rgba(92,60,255,0.18);
+      font-size:20px;
+    }
+    .brand h1{font-size:18px;margin:0;letter-spacing:0.2px}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    .top-actions{display:flex;gap:12px;align-items:center}
+    .search-input{
+      display:flex;align-items:center;gap:8px;
+      background:var(--glass);border:1px solid var(--glass-border);
+      padding:10px 12px;border-radius:12px;min-width:320px;backdrop-filter:blur(6px);
+      transition:all var(--transition);
+    }
+    .search-input input{
+      background:transparent;border:0;color:inherit;outline:none;font-size:14px;width:260px;
+    }
+    .top-btn{
+      background:transparent;border:1px solid var(--glass-border);padding:10px 12px;border-radius:10px;
+      cursor:pointer;font-weight:600;display:inline-flex;gap:8px;align-items:center;transition:all var(--transition);
+      color: #e6eef8; /* Fixed: Changed from black to white */
+    }
+    .top-btn.primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:white;box-shadow:0 8px 24px rgba(124,92,255,0.16);
+    }
+    .icon-btn{
+      width:44px;height:44px;border-radius:10px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--glass-border);
+    }
+
+    /* ==========================
+       Main area
+       ========================== */
+    .main{
+      display:grid;grid-template-columns: 1fr 420px;gap:24px;
+      align-items:start;
+    }
+    @media (max-width:1000px){ .main{grid-template-columns:1fr} .right-col{order:2} }
+
+    /* Wizard card */
+    .wizard-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: var(--radius); padding:22px; box-shadow:var(--card-shadow);
+      border:1px solid var(--glass-border); overflow:hidden;
+      position: relative;
+    }
+    .wizard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,255,0.5), transparent);
+    }
+    .wizard-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;
+    }
+    .wizard-title{font-size:18px;font-weight:700}
+    .wizard-sub{color:var(--muted);font-size:13px}
+
+    /* progress */
+    .progress-wrap{margin:14px 0}
+    .progress-track{height:8px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+    .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));transition:width 450ms ease}
+
+    /* question flow */
+    .question-stage{display:grid;gap:12px;align-items:start}
+    .q-title{font-weight:600;font-size:16px}
+    .q-desc{color:var(--muted);font-size:13px}
+    .options-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:8px;
+    }
+    .option{
+      padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.02);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;
+      transition:all var(--transition);text-align:center;
+      position: relative;
+      overflow: hidden;
+    }
+    .option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(124,92,255,0.1), rgba(255,94,122,0.05));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .option i{font-size:20px;color:var(--accent);position: relative;z-index: 1;}
+    .option span{font-weight:600;font-size:13px;position: relative;z-index: 1;}
+    .option:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(2,6,23,0.6);border-color:rgba(124,92,255,0.14)}
+    .option:hover::before {opacity: 1;}
+    .option.selected{background:linear-gradient(90deg,rgba(124,92,255,0.14), rgba(255,94,122,0.06));border:1px solid rgba(124,92,255,0.18);color:#fff}
+    .option.selected i{color:white}
+    .option.selected::before {opacity: 1;}
+
+    /* nav */
+    .wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:12px}
+    .dots{display:flex;gap:8px}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.06)}
+    .dot.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));transform:scale(1.2);box-shadow:0 6px 18px rgba(124,92,255,0.12)}
+
+    /* right column: featured & watchlist */
+    .right-col{display:flex;flex-direction:column;gap:16px}
+    .card-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .section{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:14px;border-radius:12px;border:1px solid var(--glass-border);
+      position: relative;
+    }
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,255,0.3), transparent);
+    }
+
+    /* Enhanced trending section with scrolling animation */
+    .trending-container {
+      overflow: hidden;
+      position: relative;
+      transition: height var(--transition);
+    }
+    
+    .trending-container.collapsed {
+      height: 80px;
+    }
+    
+    .trending-container.expanded {
+      height: 220px;
+    }
+    
+    /* Compact state styling */
+    .trending-compact {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .compact-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      color: var(--muted);
+    }
+    
+    .compact-content i {
+      font-size: 24px;
+      color: var(--accent);
+      opacity: 0.7;
+    }
+    
+    .compact-content span {
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 200px;
+    }
+    
+    .trending-scroll {
+      display: flex;
+      gap: 12px;
+      animation: scrollTrending 40s linear infinite;
+      width: max-content;
+    }
+    
+    .trending-scroll:hover {
+      animation-play-state: paused;
+    }
+    
+    @keyframes scrollTrending {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    .trending-item {
+      min-width: 120px;
+      max-width: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: transform var(--transition);
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+      border-radius: 6px;
+      padding: 5px;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .trending-item:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(124,92,255,0.2);
+      box-shadow: 0 6px 20px rgba(2,6,23,0.4);
+    }
+    
+    .trending-item img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    
+    .trending-info {
+      text-align: left;
+    }
+    
+    .trending-title {
+      font-weight: 600;
+      font-size: 10px;
+      line-height: 1.2;
+      margin-bottom: 3px;
+      color: #e6eef8;
+    }
+    
+    .trending-meta {
+      font-size: 9px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    
+    .trending-summary {
+      font-size: 8px;
+      color: var(--muted);
+      line-height: 1.3;
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+    
+    .trending-actions {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    
+    .trending-btn {
+      padding: 2px 4px;
+      border-radius: 3px;
+      border: 1px solid var(--glass-border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: inline-flex !important;
+      align-items: center;
+      gap: 2px;
+      min-width: 40px;
+      justify-content: center;
+    }
+    
+    .trending-btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .trending-btn.watchlist {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .trending-btn.watchlist:hover {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .trending-btn.trailer {
+      border-color: #ff6b6b !important;
+      color: #ff6b6b !important;
+      background: rgba(255,107,107,0.1) !important;
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    .trending-btn.trailer:hover {
+      background: #ff6b6b !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(255,107,107,0.3);
+    }
+    
+    /* Force trailer button visibility */
+    .trending-actions .trending-btn.trailer {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* Trending buttons layout */
+    .trending-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    /* Trending load button styling */
+    .trending-load-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 15px rgba(124,92,255,0.2);
+    }
+    
+    .trending-load-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124,92,255,0.3);
+    }
+    
+    .trending-load-btn:active {
+      transform: translateY(0);
+    }
+    
+    .trending-load-btn i {
+      font-size: 11px;
+    }
+    
+    /* Trending collapse button styling */
+    .trending-collapse-btn {
+      background: rgba(255,255,255,0.1);
+      color: var(--muted);
+      border: 1px solid var(--glass-border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .trending-collapse-btn:hover {
+      background: rgba(255,255,255,0.15);
+      color: #e6eef8;
+      transform: translateY(-1px);
+    }
+    
+    /* Loading state styles */
+    .trending-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* featured grid */
+    .featured-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .featured-item{
+      display:flex;gap:10px;align-items:center;
+      transition: transform var(--transition);
+      cursor: pointer;
+    }
+    .featured-item:hover {
+      transform: translateX(5px);
+    }
+    .featured-item img{width:64px;height:92px;object-fit:cover;border-radius:8px;box-shadow: 0 4px 12px rgba(0,0,0,0.2);}
+    .featured-info{display:flex;flex-direction:column}
+    .featured-title{font-weight:700;font-size:14px}
+    .featured-meta{font-size:12px;color:var(--muted)}
+
+    /* results area (below wizard) */
+    .results-section{margin-top:20px}
+    .results-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:12px;
+    }
+    .movie-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;overflow:hidden;border:1px solid var(--glass-border);transition:all var(--transition);
+      display:flex;flex-direction:column;
+      position: relative;
+    }
+    .movie-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,255,0.3), transparent);
+    }
+    .movie-poster{width:100%;height:320px;object-fit:cover;display:block;transition:transform var(--transition)}
+    .movie-card:hover{transform:translateY(-10px);box-shadow:0 20px 60px rgba(2,6,23,0.7)}
+    .movie-card:hover .movie-poster{transform:scale(1.04)}
+    .movie-info{padding:12px;display:flex;flex-direction:column;gap:8px}
+    .movie-title{font-weight:700;font-size:15px}
+    .movie-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+    .movie-desc{color:var(--muted);font-size:13px;line-height:1.3;height:56px;overflow:hidden}
+
+    .movie-actions{display:flex;gap:8px;margin-top:auto}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;padding:10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;font-weight:600;
+      transition: all var(--transition);
+      color: #e6eef8; /* Fixed: Changed from black to white */
+    }
+    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none;box-shadow:0 10px 30px rgba(124,92,255,0.12)}
+    .btn.ghost{background:transparent;color:var(--muted)}
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    /* Movie card buttons styled like trending buttons */
+    .movie-actions .btn.watchlist {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: transparent;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all var(--transition);
+    }
+    
+    .movie-actions .btn.watchlist:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(124,92,255,0.3);
+    }
+    
+    .movie-actions .btn.trailer {
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+      background: rgba(255,107,107,0.1);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all var(--transition);
+    }
+    
+    .movie-actions .btn.trailer:hover {
+      background: #ff6b6b;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255,107,107,0.3);
+    }
+
+    /* loading & toast */
+    .loading{display:grid;place-items:center;padding:30px}
+    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,0.06);border-top-color:var(--accent);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .toast{
+      position:fixed;right:20px;bottom:20px;background:linear-gradient(90deg,var(--success), #21c87a);padding:12px 16px;border-radius:10px;box-shadow:0 8px 30px rgba(2,6,23,0.4);display:flex;align-items:center;gap:10px;transform:translateY(10px);opacity:0;transition:all var(--transition);
+      z-index: 1000;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    /* watchlist panel */
+    .watchlist-panel{display:grid;gap:10px}
+    .watchlist-grid{display:grid;grid-template-columns:1fr;gap:10px}
+    .empty{padding:18px;border-radius:10px;background:rgba(255,255,255,0.02);color:var(--muted);text-align:center}
+
+    /* New professional elements */
+    .header-decoration {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(124,92,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 20px;
+      border-top: 1px solid var(--glass-border);
+    }
+    
+
+    
+    .tooltip {
+      position: relative;
+    }
+    
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 10px;
+      background: var(--bg-200);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    /* small screens */
+    @media (max-width:720px){
+      .search-input{min-width:unset;width:100%}
+      .main{grid-template-columns:1fr}
+      .featured-grid{grid-template-columns:repeat(3,1fr)}
+      .movie-poster{height:260px}
+
+      .trending-container {
+        height: 240px;
+      }
+      .trending-item {
+        min-width: 140px;
+        padding: 6px;
+      }
+      .trending-item img {
+        height: 140px;
+      }
+      .trending-title {
+        font-size: 11px;
+      }
+      .trending-summary {
+        -webkit-line-clamp: 2;
+        font-size: 9px;
+      }
+      .trending-actions {
+        gap: 4px;
+      }
+      .trending-btn {
+        padding: 3px 6px;
+        font-size: 9px;
+        min-width: 45px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="header-decoration"></div>
+  <div class="container">
+    <!-- Top bar -->
+    <header class="topbar" role="banner">
+      <div class="brand">
+        <div class="logo"><i class="fas fa-hat-wizard"></i></div>
+        <div>
+          <h1>Dobby Movie Wizard</h1>
+          <p>AI-powered movie recommendations</p>
+        </div>
+      </div>
+
+      <div class="top-actions" role="region" aria-label="Search and actions">
+        <div class="search-input" id="search-wrap">
+          <i class="fas fa-search" style="opacity:.8"></i>
+          <input id="search-box" placeholder="Search movies (press Enter) — e.g. Inception" aria-label="Search movies">
+          <button class="top-btn" id="search-btn" title="Search">Search</button>
+        </div>
+
+        <button class="top-btn primary" id="quick-recommend" data-tooltip="Get instant recommendations">
+          <i class="fas fa-magic"></i> Quick Recommend
+        </button>
+      </div>
+    </header>
+    
+
+
+    <main class="main" role="main" aria-live="polite">
+      <!-- LEFT: Wizard & Results -->
+      <div>
+        <div class="wizard-card" id="wizard-container" aria-labelledby="wizard-title">
+          <div class="wizard-head">
+            <div>
+              <div class="wizard-title" id="wizard-title">Tell me about your movie night</div>
+              <div class="wizard-sub">Quick questions → tailored picks</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:12px;color:var(--muted)">Powered by Dobby • TMDB</div>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-track"><div class="progress-bar" id="progress"></div></div>
+          </div>
+
+          <!-- Questions (same content/flow, but with slide behavior) -->
+          <div id="questions-area" class="question-stage">
+            <!-- Question templates -->
+            <section class="question-slide" data-q="1">
+              <div class="q-title">What's the occasion?</div>
+              <div class="q-desc">Pick the setting for your movie night</div>
+              <div class="options-grid">
+                <div class="option" data-value="date"><i class="fas fa-heart"></i><span>Date Night</span></div>
+                <div class="option" data-value="family"><i class="fas fa-home"></i><span>Family</span></div>
+                <div class="option" data-value="solo"><i class="fas fa-user"></i><span>Solo</span></div>
+                <div class="option" data-value="party"><i class="fas fa-glass-cheers"></i><span>Party</span></div>
+              </div>
+            </section>
+
+            <section class="question-slide" data-q="2" style="display:none">
+              <div class="q-title">How are you feeling?</div>
+              <div class="q-desc">Your current mood</div>
+              <div class="options-grid">
+                <div class="option" data-value="happy"><i class="fas fa-smile"></i><span>Happy</span></div>
+                <div class="option" data-value="sad"><i class="fas fa-sad-tear"></i><span>Sad</span></div>
+                <div class="option" data-value="excited"><i class="fas fa-star"></i><span>Excited</span></div>
+                <div class="option" data-value="nostalgic"><i class="fas fa-clock"></i><span>Nostalgic</span></div>
+              </div>
+            </section>
+
+            <section class="question-slide" data-q="3" style="display:none">
+              <div class="q-title">What genre do you want?</div>
+              <div class="q-desc">Choose a primary genre</div>
+              <div class="options-grid">
+                <div class="option" data-value="action"><i class="fas fa-fist-raised"></i><span>Action</span></div>
+                <div class="option" data-value="comedy"><i class="fas fa-laugh"></i><span>Comedy</span></div>
+                <div class="option" data-value="drama"><i class="fas fa-theater-masks"></i><span>Drama</span></div>
+                <div class="option" data-value="sci-fi"><i class="fas fa-rocket"></i><span>Sci-Fi</span></div>
+                <div class="option" data-value="horror"><i class="fas fa-ghost"></i><span>Horror</span></div>
+                <div class="option" data-value="romance"><i class="fas fa-heart"></i><span>Romance</span></div>
+              </div>
+            </section>
+
+            <section class="question-slide" data-q="4" style="display:none">
+              <div class="q-title">How old should the movie be?</div>
+              <div class="q-desc">Era preference</div>
+              <div class="options-grid">
+                <div class="option" data-value="new"><i class="fas fa-calendar-alt"></i><span>New Releases</span></div>
+                <div class="option" data-value="recent"><i class="fas fa-history"></i><span>Last 5 Years</span></div>
+                <div class="option" data-value="classic"><i class="fas fa-film"></i><span>Classics</span></div>
+                <div class="option" data-value="any"><i class="fas fa-infinity"></i><span>Any Era</span></div>
+              </div>
+            </section>
+
+            <section class="question-slide" data-q="5" style="display:none">
+              <div class="q-title">Who's watching?</div>
+              <div class="q-desc">Audience</div>
+              <div class="options-grid">
+                <div class="option" data-value="kids"><i class="fas fa-child"></i><span>Kids</span></div>
+                <div class="option" data-value="teens"><i class="fas fa-users"></i><span>Teens</span></div>
+                <div class="option" data-value="adults"><i class="fas fa-user-friends"></i><span>Adults</span></div>
+                <div class="option" data-value="all"><i class="fas fa-globe"></i><span>All Ages</span></div>
+                <div class="option" data-value="couples"><i class="fas fa-heart"></i><span>Couples</span></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="wizard-nav">
+            <div style="display:flex;gap:8px">
+              <button class="top-btn" id="prev-btn" disabled><i class="fas fa-arrow-left"></i> Prev</button>
+              <button class="top-btn" id="next-btn">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="dots" id="dots-wrap">
+                <div class="dot active" data-q="1"></div>
+                <div class="dot" data-q="2"></div>
+                <div class="dot" data-q="3"></div>
+                <div class="dot" data-q="4"></div>
+                <div class="dot" data-q="5"></div>
+              </div>
+
+              <button class="top-btn primary" id="submit-btn" style="display:none"><i class="fas fa-ticket-alt"></i> Get Recommendations</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading" style="display:none">
+          <div style="text-align:center">
+            <div class="spinner"></div>
+            <div style="margin-top:12px;color:var(--muted)">Dobby is conjuring great picks...</div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results-section" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-direction:column">
+              <h2 style="margin:0">Your Personalized Movie Recommendations</h2>
+              <div style="color:var(--muted);font-size:13px">Hand-picked just for your mood & occasion</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="top-btn" id="back-to-wizard"><i class="fas fa-arrow-left"></i> Edit Preferences</button>
+              <button class="top-btn" id="restart-btn"><i class="fas fa-redo"></i> Start Over</button>
+            </div>
+          </div>
+
+          <div class="results-grid" id="results-grid"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Featured & Watchlist -->
+      <aside class="right-col">
+        <div class="section">
+          <div class="card-title">
+            <strong>Trending Now</strong>
+            <div class="trending-buttons">
+              <button class="trending-load-btn" onclick="loadTrendingMovies()">
+                <i class="fas fa-play"></i>
+                Load Trending Movies
+              </button>
+              <button class="trending-collapse-btn" onclick="collapseTrendingMovies()" style="display: none;">
+                <i class="fas fa-compress"></i>
+                Collapse
+              </button>
+          </div>
+          </div>
+          <div class="trending-container collapsed" id="trending-container">
+            <div class="trending-compact" id="trending-compact">
+              <div class="compact-content">
+                <i class="fas fa-film"></i>
+                <span>Click "Load Trending Movies" to see what's popular</span>
+              </div>
+            </div>
+            <div class="trending-scroll" id="trending-scroll" style="display: none;">
+              <!-- Movies will be loaded here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="section watchlist-panel" id="watchlist-panel">
+          <div class="card-title">
+            <strong>Your Watchlist</strong>
+            <div style="display:flex;gap:8px">
+              <button class="top-btn ghost" id="clear-watchlist">Clear</button>
+              <button class="top-btn ghost" id="open-watchlist">Open</button>
+            </div>
+          </div>
+          <div class="watchlist-grid" id="watchlist-grid-preview"></div>
+          <div class="empty" id="empty-watchlist-preview" style="display:none">Your watchlist is empty — add movies to see them here.</div>
+        </div>
+      </aside>
+    </main>
+    
+    <div class="footer">
+      <p>Dobby Movie Wizard &copy; 2023 • AI-Powered Movie Recommendations</p>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"><i class="fas fa-check-circle"></i><div id="toast-text">Added</div></div>
+
+  <!-- ========== Script (logic) ========== -->
+  <script>
+    // Secrets moved server-side. Client now calls our Vercel API routes.
+    // Configure env on Vercel: TMDB_API_KEY, FIREWORK_API_KEY, DOBBY_MODEL.
+
+    // Inline SVG placeholder to avoid external placeholders
+    const NO_IMAGE_URL = (() => {
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'>
+        <rect fill='#1a2a6c' width='100%' height='100%'/>
+        <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#ffffff' font-family='Arial, sans-serif' font-size='16'>No Image</text>
+      </svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    })();
+
+    // -------------------------
+    // App state
+    // -------------------------
+    let currentQuestion = 1;
+    const userSelections = { occasion:'', mood:'', genre:'', era:'', audience:'' };
+    let watchlist = JSON.parse(localStorage.getItem('dobby_watchlist')) || [];
+
+    // DOM refs
+    const progressEl = document.getElementById('progress');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const loadingEl = document.getElementById('loading');
+    const resultsEl = document.getElementById('results');
+    const resultsGrid = document.getElementById('results-grid');
+    const wizardContainer = document.getElementById('wizard-container');
+    const questionsArea = document.getElementById('questions-area');
+    const dots = document.querySelectorAll('.dot');
+    const featuredGrid = document.getElementById('featured-grid');
+    const watchlistToggle = document.getElementById('watchlist-toggle');
+    const watchlistCount = document.getElementById('watchlist-count');
+    const watchlistPreview = document.getElementById('watchlist-grid-preview');
+    const emptyPreview = document.getElementById('empty-watchlist-preview');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+
+    // Search & quick actions
+    const searchBox = document.getElementById('search-box');
+    const searchBtn = document.getElementById('search-btn');
+    const quickRecBtn = document.getElementById('quick-recommend');
+
+    // -------------------------
+    // Initialize
+    // -------------------------
+    function init(){
+      console.log('Initializing Dobby Movie Wizard...');
+      
+      // Check if trending element exists
+      const trendingElement = document.getElementById('trending-scroll');
+      if (trendingElement) {
+        console.log('✅ Trending scroll element found');
+      } else {
+        console.error('❌ Trending scroll element NOT found!');
+      }
+      
+      updateProgress();
+      attachListeners();
+      
+      // Trending movies start in compact mode
+      console.log('Trending movies in compact mode - click button to expand');
+      
+      renderWatchlistPreview();
+      updateWatchlistCount();
+      
+      // Add subtle animation to options on load
+      setTimeout(() => {
+        document.querySelectorAll('.option').forEach((option, index) => {
+          option.style.transitionDelay = `${index * 0.05}s`;
+          option.style.opacity = '1';
+          option.style.transform = 'translateY(0)';
+        });
+      }, 300);
+    }
+    
+    // Test TMDB API connection
+    async function testTMDBAPI() {
+      try {
+        console.log('Testing TMDB API connection...');
+        
+        // Try with CORS proxy if direct request fails
+        let res = await fetch(`/api/tmdb/popular`);
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        if (!data.results || data.results.length === 0) {
+          throw new Error('No results from TMDB API');
+        }
+        
+        console.log('TMDB API test successful, found', data.results.length, 'movies');
+        return true;
+      } catch (err) {
+        console.error('TMDB API test failed:', err);
+        throw err;
+      }
+    }
+    
+    // Toggle watchlist for trending movies
+    function toggleWatchlist(movieId, title, rating, releaseDate, description, poster) {
+      const movie = {
+        id: movieId,
+        title: title,
+        rating: rating,
+        year: releaseDate ? new Date(releaseDate).getFullYear() : 'N/A',
+        description: description,
+        poster: poster
+      };
+      
+      const existingIndex = watchlist.findIndex(w => w.id === movieId);
+      
+      if (existingIndex !== -1) {
+        // Remove from watchlist
+        watchlist.splice(existingIndex, 1);
+        showToast(`Removed ${title} from watchlist`);
+      } else {
+        // Add to watchlist
+        watchlist.push(movie);
+        showToast(`Added ${title} to watchlist`);
+      }
+      
+      // Update localStorage and UI
+      localStorage.setItem('dobby_watchlist', JSON.stringify(watchlist));
+      renderWatchlistPreview();
+      updateWatchlistCount();
+      
+      // Refresh trending movies to update watchlist button states
+      loadFeaturedMovies();
+    }
+    
+    // Open trailer on YouTube
+    function openTrailer(movieTitle) {
+      try {
+        // Search for trailer on YouTube
+        const searchQuery = encodeURIComponent(`${movieTitle} official trailer`);
+        const youtubeUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+        
+        // Open in new tab
+        window.open(youtubeUrl, '_blank');
+        showToast(`Searching for ${movieTitle} trailer on YouTube`);
+      } catch (err) {
+        console.error('Error opening trailer:', err);
+        showToast('Failed to open trailer');
+      }
+    }
+    
+    // Load trending movies function (called by button click)
+    function loadTrendingMovies() {
+      console.log('Loading trending movies...');
+      
+      // Get container elements
+      const trendingContainer = document.getElementById('trending-container');
+      const trendingCompact = document.getElementById('trending-compact');
+      const trendingScroll = document.getElementById('trending-scroll');
+      
+      if (trendingContainer && trendingCompact && trendingScroll) {
+        // Hide compact view and show scroll view
+        trendingCompact.style.display = 'none';
+        trendingScroll.style.display = 'flex';
+        
+        // Expand the container
+        trendingContainer.classList.remove('collapsed');
+        trendingContainer.classList.add('expanded');
+        
+        // Show loading state
+        trendingScroll.innerHTML = `
+          <div class="trending-item">
+            <img src="https://via.placeholder.com/120x110/1a2a6c/fff?text=Loading..." alt="Loading">
+            <div class="trending-info">
+              <div class="trending-title">Loading Trending Movies...</div>
+              <div class="trending-meta">Please wait</div>
+              <div class="trending-summary">Fetching the latest popular movies from TMDB...</div>
+              <div class="trending-actions">
+                <button class="trending-btn watchlist" disabled><i class="fas fa-spinner fa-spin"></i> Loading</button>
+                <button class="trending-btn trailer" disabled><i class="fab fa-youtube"></i> Loading</button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Change button to reload mode and show collapse button
+        const loadBtn = document.querySelector('.trending-load-btn');
+        const collapseBtn = document.querySelector('.trending-collapse-btn');
+        if (loadBtn) {
+          loadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Reload';
+          loadBtn.onclick = reloadTrendingMovies;
+        }
+        if (collapseBtn) {
+          collapseBtn.style.display = 'inline-flex';
+        }
+      }
+      
+      // Call the existing loadFeaturedMovies function
+      loadFeaturedMovies();
+    }
+    
+    // Reload trending movies function
+    function reloadTrendingMovies() {
+      console.log('Reloading trending movies...');
+      showToast('Refreshing trending movies...');
+      loadFeaturedMovies();
+    }
+    
+    // Collapse trending movies back to compact mode
+    function collapseTrendingMovies() {
+      const trendingContainer = document.getElementById('trending-container');
+      const trendingCompact = document.getElementById('trending-compact');
+      const trendingScroll = document.getElementById('trending-scroll');
+      
+      if (trendingContainer && trendingCompact && trendingScroll) {
+        // Show compact view and hide scroll view
+        trendingCompact.style.display = 'flex';
+        trendingScroll.style.display = 'none';
+        
+        // Collapse the container
+        trendingContainer.classList.remove('expanded');
+        trendingContainer.classList.add('collapsed');
+        
+        // Change button back to load mode and hide collapse button
+        const loadBtn = document.querySelector('.trending-load-btn');
+        const collapseBtn = document.querySelector('.trending-collapse-btn');
+        if (loadBtn) {
+          loadBtn.innerHTML = '<i class="fas fa-play"></i> Load Trending Movies';
+          loadBtn.onclick = loadTrendingMovies;
+        }
+        if (collapseBtn) {
+          collapseBtn.style.display = 'none';
+        }
+      }
+    }
+    
+
+
+    // -------------------------
+    // Wizard helpers
+    // -------------------------
+    function updateProgress(){
+      const pct = (currentQuestion / 5) * 100;
+      progressEl.style.width = pct + '%';
+      dots.forEach(d => {
+        const q = Number(d.dataset.q);
+        d.classList.toggle('active', q <= currentQuestion);
+      });
+      prevBtn.disabled = currentQuestion === 1;
+      // display/hide submit
+      if(currentQuestion < 5){ nextBtn.style.display='inline-flex'; submitBtn.style.display='none'}
+      else { nextBtn.style.display='none'; submitBtn.style.display='inline-flex' }
+    }
+
+    function showQuestion(n){
+      document.querySelectorAll('.question-slide').forEach(sec=>{
+        sec.style.display = Number(sec.dataset.q) === n ? 'block' : 'none';
+      });
+      currentQuestion = n;
+      updateProgress();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    prevBtn.addEventListener('click', ()=>{ if(currentQuestion>1) showQuestion(currentQuestion-1); });
+    nextBtn.addEventListener('click', ()=>{ if(currentQuestion<5) showQuestion(currentQuestion+1); });
+    dots.forEach(d => d.addEventListener('click', ()=> {
+      const q = Number(d.dataset.q);
+      if(q < currentQuestion) showQuestion(q);
+    }));
+
+    // Option clicks (delegation)
+    questionsArea.addEventListener('click', (ev) => {
+      const opt = ev.target.closest('.option');
+      if(!opt) return;
+      // deselect siblings
+      const container = opt.closest('.options-grid');
+      container.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+      opt.classList.add('selected');
+
+      // record selection
+      const q = Number(opt.closest('.question-slide').dataset.q);
+      const val = opt.dataset.value;
+      switch(q){
+        case 1: userSelections.occasion = val; break;
+        case 2: userSelections.mood = val; break;
+        case 3: userSelections.genre = val; break;
+        case 4: userSelections.era = val; break;
+        case 5: userSelections.audience = val; break;
+      }
+      // enable next/submit
+      if(q < 5) nextBtn.disabled = false;
+      else submitBtn.disabled = false;
+    });
+
+    // restart & back
+    restartBtn.addEventListener('click', restartWizard);
+    document.getElementById('back-to-wizard').addEventListener('click', () => {
+      resultsEl.style.display='none';
+      wizardContainer.style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    // dots / submit
+    submitBtn.addEventListener('click', submitForm);
+
+    // quick rec: fill nothing -> use defaults and submit
+    quickRecBtn.addEventListener('click', async () => {
+      // set some defaults (non-destructive)
+      if(!userSelections.genre) userSelections.genre = 'drama';
+      if(!userSelections.era) userSelections.era = 'recent';
+      if(!userSelections.audience) userSelections.audience = 'adults';
+      // show loading & get
+      await submitForm();
+    });
+
+
+
+    // -------------------------
+    // Search functionality
+    // -------------------------
+    searchBtn.addEventListener('click', ()=> doSearch(searchBox.value));
+    searchBox.addEventListener('keydown', (e)=> { if(e.key === 'Enter') doSearch(searchBox.value) });
+
+    async function doSearch(query){
+      if(!query || !query.trim()) return;
+      showLoading();
+      try{
+        const movies = await searchTMDB(query, 6);
+        hideLoading();
+        showResults(movies);
+      }catch(e){
+        hideLoading();
+        console.error(e);
+        alert('Search error. Check console.');
+      }
+    }
+
+    async function searchTMDB(q, limit=6){
+      const res = await fetch(`/api/tmdb/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      const list = (data.results || []).slice(0, limit).map(m => ({
+        id:m.id,
+        title:m.title,
+        year: m.release_date ? new Date(m.release_date).getFullYear() : 'N/A',
+        rating: m.vote_average,
+        description: m.overview,
+        poster: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+        trailer: ''
+      }));
+      // try to get each trailer key (lightweight)
+      for(const mv of list){
+        try{
+          const md = await (await fetch(`/api/tmdb/details?id=${mv.id}`)).json();
+          if(md.videos && md.videos.results){
+            const t = md.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            if(t) mv.trailer = `https://www.youtube.com/watch?v=${t.key}`;
+          }
+        }catch(e){}
+      }
+      return list;
+    }
+
+    // -------------------------
+    // Submit -> call Dobby -> TMDB details
+    // -------------------------
+    async function submitForm(){
+      // validate selections? It's okay if empty; fallback exists
+      wizardContainer.style.display='none';
+      resultsEl.style.display='none';
+      showLoading();
+
+      try{
+        const movieTitles = await getDobbyRecommendations();
+        const movieDetails = await getMovieDetails(movieTitles);
+        hideLoading();
+        showResults(movieDetails);
+      }catch(e){
+        hideLoading();
+        console.error(e);
+        alert('Sorry, something went wrong while fetching recommendations.');
+      }
+    }
+
+    async function getDobbyRecommendations(){
+      const prompt = `Recommend 5 movies for a ${userSelections.occasion || 'casual'} occasion where I'm feeling ${userSelections.mood || 'neutral'}. 
+I prefer ${userSelections.genre || 'drama'} movies from the ${userSelections.era || 'any'} era, suitable for ${userSelections.audience || 'adults'}. 
+Please return only the movie titles in a comma-separated list.`;
+      try {
+        const resp = await fetch('/api/recommend', {
+          method:'POST',
+          headers:{ 'Accept':'application/json','Content-Type':'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        if(!resp.ok) throw new Error(`Model API ${resp.status}`);
+        const data = await resp.json();
+        const content = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+        return parseMovieTitles(content);
+      } catch (err) {
+        console.warn('Dobby API failed, using fallback:', err);
+        return getFallbackRecommendations();
+      }
+    }
+
+    function parseMovieTitles(movieList){
+      if(!movieList) return [];
+      const titles = movieList.replace(/\d+\./g,'').split(/[\n,]/).map(t=> t.trim().replace(/["']/g,'')).filter(Boolean);
+      return titles.slice(0,5);
+    }
+
+    function getFallbackRecommendations(){
+      const key = `${userSelections.occasion}-${userSelections.mood}-${userSelections.genre}-${userSelections.era}-${userSelections.audience}`;
+      const map = {
+        'date-happy-comedy-new-adults': ['Crazy Stupid Love','La La Land','The Proposal','Silver Linings Playbook','500 Days of Summer'],
+        'family-happy-comedy-recent-kids': ['Toy Story 4','The Incredibles 2','Frozen II','Paddington 2','Spider-Man: Into the Spider-Verse'],
+        'solo-excited-action-recent-adults': ['John Wick','Mad Max: Fury Road','The Dark Knight','Inception','The Matrix'],
+        'party-excited-comedy-any-teens': ['Superbad','The Hangover','Bridesmaids','21 Jump Street','Step Brothers'],
+        'nostalgic-happy-romance-any-couples': ['Titanic','Notting Hill','You\'ve Got Mail','Sleepless in Seattle','Pretty Woman'],
+        'default':['The Shawshank Redemption','The Godfather','Pulp Fiction','Forrest Gump','The Dark Knight']
+      };
+      return map[key] || map['default'];
+    }
+
+    // Fetch details by titles using TMDB search + details (like original)
+    async function getMovieDetails(movieTitles){
+      const details = [];
+      for(const t of movieTitles){
+        try{
+          const s = await fetch(`/api/tmdb/search?q=${encodeURIComponent(t)}`);
+          const sd = await s.json();
+          if(sd.results && sd.results.length>0){
+            const m = sd.results[0];
+            const md = await (await fetch(`/api/tmdb/details?id=${m.id}`)).json();
+            let trailerKey = '';
+            if(md.videos && md.videos.results){
+              const tr = md.videos.results.find(v=> v.type === 'Trailer' && v.site === 'YouTube');
+              if(tr) trailerKey = tr.key;
+            }
+            details.push({
+              id: md.id,
+              title: md.title,
+              year: md.release_date ? new Date(md.release_date).getFullYear() : 'Unknown',
+              rating: md.vote_average,
+              description: md.overview,
+              poster: md.poster_path ? `https://image.tmdb.org/t/p/w500${md.poster_path}` : '',
+              trailer: trailerKey ? `https://www.youtube.com/watch?v=${trailerKey}` : ''
+            });
+          }
+        }catch(err){
+          console.warn('Error details for', t, err);
+        }
+      }
+      return details;
+    }
+
+    // Show results in grid
+    function showResults(movies){
+      resultsEl.style.display='block';
+      wizardContainer.style.display='none';
+      resultsGrid.innerHTML='';
+      if(!movies || movies.length===0){
+        resultsGrid.innerHTML = `<div class="empty">No movies found. Try again or use search.</div>`;
+        return;
+      }
+      movies.forEach(movie => {
+        const inWatch = watchlist.some(w => w.id === movie.id);
+        const card = document.createElement('div');
+        card.className = 'movie-card';
+        card.innerHTML = `
+          <img class="movie-poster" src="${movie.poster || NO_IMAGE_URL}" alt="${movie.title}">
+          <div class="movie-info">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+              <div style="flex:1">
+                <div class="movie-title">${movie.title}</div>
+                <div class="movie-meta"><div>${movie.year || 'N/A'}</div><div>⭐ ${movie.rating || 'N/A'}</div></div>
+              </div>
+            </div>
+            <div class="movie-desc">${movie.description || 'No description available.'}</div>
+            <div class="movie-actions" style="margin-top:10px">
+              ${movie.trailer ? `<button class="btn trailer" onclick="window.open('${movie.trailer}', '_blank')"><i class="fab fa-youtube"></i> Trailer</button>` : ''}
+              <button class="btn watchlist add-watchlist" data-id="${movie.id}">${inWatch ? '<i class="fas fa-check"></i> Added' : '<i class="fas fa-plus"></i> Watchlist'}</button>
+            </div>
+          </div>
+        `;
+        resultsGrid.appendChild(card);
+      });
+
+      // attach watchlist handlers
+      document.querySelectorAll('.add-watchlist').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = Number(btn.dataset.id);
+          const already = watchlist.some(w=>w.id===id);
+          if(already){
+            removeFromWatchlist(id);
+            btn.innerHTML = '<i class="fas fa-plus"></i> Watchlist';
+            btn.classList.remove('primary');
+            showToast('Removed from watchlist');
+          } else {
+            const movie = movies.find(m => m.id === id);
+            if(movie){ addToWatchlist(movie); btn.innerHTML = '<i class="fas fa-check"></i> Added'; btn.classList.remove('primary'); showToast('Added to watchlist'); }
+          }
+        });
+      });
+
+      // scroll
+      resultsEl.scrollIntoView({behavior:'smooth'});
+    }
+
+    // -------------------------
+    // Watchlist logic
+    // -------------------------
+    function addToWatchlist(movie){
+      if(!watchlist.some(w=>w.id===movie.id)){
+        watchlist.push(movie);
+        localStorage.setItem('dobby_watchlist', JSON.stringify(watchlist));
+        renderWatchlistPreview();
+        updateWatchlistCount();
+      }
+    }
+    function removeFromWatchlist(id){
+      watchlist = watchlist.filter(m => m.id !== id);
+      localStorage.setItem('dobby_watchlist', JSON.stringify(watchlist));
+      renderWatchlistPreview();
+      updateWatchlistCount();
+      // If watchlist panel open, refresh
+      // (we keep a simple preview in right column)
+    }
+    function renderWatchlistPreview(){
+      watchlistPreview.innerHTML = '';
+      if(!watchlist || watchlist.length === 0){
+        emptyPreview.style.display = 'block';
+        return;
+      }
+      emptyPreview.style.display='none';
+      watchlist.slice(0,6).forEach(m=>{
+        const node = document.createElement('div');
+        node.className = 'featured-item';
+        node.innerHTML = `<img src="${m.poster || NO_IMAGE_URL}"><div class="featured-info"><div class="featured-title">${m.title}</div><div class="featured-meta">⭐ ${m.rating || 'N/A'}</div></div>`;
+        // click to open trailer in new tab if available
+        node.addEventListener('click', ()=> {
+          if(m.trailer) window.open(m.trailer, '_blank');
+        });
+        watchlistPreview.appendChild(node);
+      });
+    }
+    function updateWatchlistCount(){
+      watchlistCount.textContent = watchlist.length ? `(${watchlist.length})` : '(0)';
+    }
+    document.getElementById('open-watchlist').addEventListener('click', ()=> {
+      // show a simple overlay with watchlist items (quick implementation)
+      if(watchlist.length===0){ alert('Watchlist empty'); return; }
+      let html = 'Your Watchlist:\n\n';
+      watchlist.forEach(w=> html += `${w.title} (${w.year}) — ⭐ ${w.rating}\n`);
+      alert(html);
+    });
+    document.getElementById('clear-watchlist').addEventListener('click', ()=> {
+      if(confirm('Clear your watchlist?')){ watchlist = []; localStorage.removeItem('dobby_watchlist'); renderWatchlistPreview(); updateWatchlistCount(); showToast('Watchlist cleared'); }
+    });
+
+    // -------------------------
+    // Featured movies (right column)
+    // -------------------------
+    async function loadFeaturedMovies(){
+      try{
+        console.log('Loading trending movies...');
+        
+        // Show loading state immediately
+        const trendingScroll = document.getElementById('trending-scroll');
+        if (!trendingScroll) {
+          console.error('trending-scroll element not found!');
+          return;
+        }
+        
+        // Show loading content first
+        trendingScroll.innerHTML = `
+          <div class="trending-item">
+            <img src="https://via.placeholder.com/120x110/1a2a6c/fff?text=Loading..." alt="Loading">
+            <div class="trending-info">
+              <div class="trending-title">Loading Trending Movies...</div>
+              <div class="trending-meta">Please wait</div>
+              <div class="trending-summary">Fetching the latest popular movies from TMDB...</div>
+              <div class="trending-actions">
+                <button class="trending-btn watchlist" disabled><i class="fas fa-spinner fa-spin"></i> Loading</button>
+                <button class="trending-btn trailer" disabled><i class="fab fa-youtube"></i> Loading</button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Try direct request first
+        let res = await fetch(`/api/tmdb/popular`);
+        if (!res.ok) {
+          throw new Error('TMDB popular failed');
+        }
+        const data = await res.json();
+        console.log('TMDB API response:', data);
+        
+        if (!data.results || data.results.length === 0) {
+          throw new Error('No results from TMDB API');
+        }
+        
+        const list = data.results.slice(0,10); // Get more movies for scrolling
+        console.log('Movies to display:', list);
+        
+        // Clear loading content and load real movies
+        trendingScroll.innerHTML = '';
+        
+        // Create movie items
+        list.forEach(movie => {
+          const movieItem = createTrendingMovieItem(movie);
+          trendingScroll.appendChild(movieItem);
+        });
+        
+        // Duplicate items for seamless scrolling
+        list.forEach(movie => {
+          const movieItem = createTrendingMovieItem(movie);
+          trendingScroll.appendChild(movieItem);
+        });
+        
+        console.log('Trending movies loaded successfully!');
+        
+      }catch(e){
+        console.error('Featured load failed:', e);
+        // Fallback to sample movies so users can see the scrolling animation
+        const trendingScroll = document.getElementById('trending-scroll');
+        if (trendingScroll) {
+          const sampleMovies = [
+            { 
+              id: 1, 
+              title: 'The Dark Knight', 
+              vote_average: 9.0, 
+              poster_path: null, 
+              overview: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.',
+              release_date: '2008-07-18'
+            },
+            { 
+              id: 2, 
+              title: 'Inception', 
+              vote_average: 8.8, 
+              poster_path: null, 
+              overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.',
+              release_date: '2010-07-16'
+            },
+            { 
+              id: 3, 
+              title: 'Pulp Fiction', 
+              vote_average: 8.9, 
+              poster_path: null, 
+              overview: 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.',
+              release_date: '1994-10-14'
+            },
+            { 
+              id: 4, 
+              title: 'Forrest Gump', 
+              vote_average: 8.8, 
+              poster_path: null, 
+              overview: 'The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75.',
+              release_date: '1994-07-06'
+            },
+            { 
+              id: 5, 
+              title: 'The Matrix', 
+              vote_average: 8.7, 
+              poster_path: null, 
+              overview: 'A computer programmer discovers that reality as he knows it is a simulation created by machines, and joins a rebellion to break free.',
+              release_date: '1999-03-31'
+            }
+          ];
+          
+          trendingScroll.innerHTML = '';
+          
+          // Create sample movie items
+          sampleMovies.forEach(movie => {
+            const movieItem = createTrendingMovieItem(movie);
+            trendingScroll.appendChild(movieItem);
+          });
+          
+          // Duplicate for seamless scrolling
+          sampleMovies.forEach(movie => {
+            const movieItem = createTrendingMovieItem(movie);
+            trendingScroll.appendChild(movieItem);
+          });
+          
+          console.log('Loaded sample movies as fallback');
+        }
+      }
+    }
+    
+    function createTrendingMovieItem(movie) {
+      const item = document.createElement('div');
+      item.className = 'trending-item';
+      
+      // Better poster image handling
+      let posterSrc = 'https://via.placeholder.com/120x110/1a2a6c/fff?text=No+Image';
+      if (movie.poster_path) {
+        posterSrc = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
+      }
+      
+      // Check if movie is in watchlist
+      const inWatchlist = watchlist.some(w => w.id === movie.id);
+      
+      // Create summary text (truncate if too long)
+      const summary = movie.overview || 'No description available.';
+      const truncatedSummary = summary.length > 120 ? summary.substring(0, 120) + '...' : summary;
+      
+      // Debug logging
+      console.log('Creating trending item for:', movie.title);
+      console.log('Movie ID:', movie.id);
+      console.log('In watchlist:', inWatchlist);
+      
+      item.innerHTML = `
+        <img src="${posterSrc}" 
+             alt="${movie.title}" 
+             onerror="this.src='https://via.placeholder.com/160x180/1a2a6c/fff?text=No+Image'"
+             onload="this.style.display='block'">
+        <div class="trending-info">
+          <div class="trending-title">${movie.title}</div>
+          <div class="trending-meta">⭐ ${movie.vote_average || 'N/A'} • ${movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}</div>
+          <div class="trending-summary">${truncatedSummary}</div>
+          <div class="trending-actions">
+            <button class="trending-btn watchlist" onclick="event.stopPropagation(); toggleWatchlist(${movie.id}, '${movie.title}', ${movie.vote_average || 0}, '${movie.release_date || ''}', '${truncatedSummary}', '${posterSrc}')">
+              <i class="fas ${inWatchlist ? 'fa-check' : 'fa-plus'}"></i>
+              ${inWatchlist ? 'Added' : 'Watchlist'}
+            </button>
+            <button class="trending-btn trailer" onclick="event.stopPropagation(); openTrailer('${movie.title}')" style="display: inline-flex !important; visibility: visible !important; opacity: 1 !important;">
+              <i class="fab fa-youtube"></i>
+              🎬 Trailer
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Debug: Check if buttons were created
+      setTimeout(() => {
+        const watchlistBtn = item.querySelector('.trending-btn.watchlist');
+        const trailerBtn = item.querySelector('.trending-btn.trailer');
+        console.log('Watchlist button found:', !!watchlistBtn);
+        console.log('Trailer button found:', !!trailerBtn);
+        if (watchlistBtn) {
+          console.log('Watchlist button classes:', watchlistBtn.className);
+          console.log('Watchlist button styles:', watchlistBtn.style.cssText);
+          console.log('Watchlist button computed display:', getComputedStyle(watchlistBtn).display);
+        }
+        if (trailerBtn) {
+          console.log('Trailer button classes:', trailerBtn.className);
+          console.log('Trailer button styles:', trailerBtn.style.cssText);
+          console.log('Trailer button computed display:', getComputedStyle(trailerBtn).display);
+          console.log('Trailer button computed visibility:', getComputedStyle(trailerBtn).visibility);
+          console.log('Trailer button computed opacity:', getComputedStyle(trailerBtn).opacity);
+        } else {
+          console.error('❌ TRAILER BUTTON NOT FOUND in item for:', movie.title);
+          console.log('Item HTML:', item.innerHTML);
+        }
+      }, 100);
+      
+      // Add click handler to open movie details
+      item.addEventListener('click', () => {
+        // You can implement a modal or redirect to movie details
+        console.log('Clicked movie:', movie.title);
+        // For now, just show a toast
+        showToast(`Selected: ${movie.title}`);
+      });
+      
+      return item;
+    }
+
+    // -------------------------
+    // Helpers: loading & toast
+    // -------------------------
+    function showLoading(){ loadingEl.style.display='block' }
+    function hideLoading(){ loadingEl.style.display='none' }
+
+    function showToast(msg){
+      toastText.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), 2800);
+    }
+
+    // -------------------------
+    // small utilities
+    // -------------------------
+    function restartWizard(){
+      currentQuestion = 1;
+      Object.keys(userSelections).forEach(k=>userSelections[k] = '');
+      document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+      showQuestion(1);
+      resultsEl.style.display='none';
+      wizardContainer.style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // -------------------------
+    // Init on load
+    // -------------------------
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
