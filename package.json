@@ -1,0 +1,12 @@
+{
+  "name": "dobby-movie-wizard",
+  "version": "1.0.0",
+  "description": "AI-powered movie recommendation wizard",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "npx serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
