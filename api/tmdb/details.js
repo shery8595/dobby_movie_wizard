@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,6 +16,7 @@ module.exports = async (req, res) => {
 
     const apiKey = process.env.TMDB_API_KEY;
     if (!apiKey) {
+      console.error('TMDB_API_KEY missing');
       return res.status(500).json({ error: 'Missing TMDB_API_KEY' });
     }
 
@@ -25,19 +26,23 @@ module.exports = async (req, res) => {
     }
 
     const url = `https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&append_to_response=videos`;
-    const r = await fetch(url);
-    const data = await r.json();
+    console.log('Fetching movie details for ID:', id);
+    
+    const response = await fetch(url);
+    const data = await response.json();
 
-    if (!r.ok) {
-      return res.status(r.status).json({
+    if (!response.ok) {
+      console.error('TMDB API error:', data);
+      return res.status(response.status).json({
         error: (data && data.status_message) || 'TMDB API error',
         details: data
       });
     }
 
+    console.log('Movie details fetched successfully for:', data.title || 'Unknown');
     res.status(200).json(data);
-  } catch (e) {
-    console.error('TMDB details error:', e);
-    res.status(500).json({ error: 'Failed to fetch TMDB details', details: e.message });
+  } catch (error) {
+    console.error('TMDB details error:', error);
+    res.status(500).json({ error: 'Failed to fetch TMDB details', details: error.message });
   }
-};
+}
