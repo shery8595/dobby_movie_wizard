@@ -14,10 +14,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "TMDB_API_KEY": "@tmdb_api_key",
-    "FIREWORK_API_KEY": "@firework_api_key",
-    "DOBBY_MODEL": "@dobby_model"
-  }
+  ]
 }
