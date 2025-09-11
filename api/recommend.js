@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,11 +12,14 @@ module.exports = async (req, res) => {
 
     const apiKey = process.env.FIREWORK_API_KEY;
     const model = process.env.DOBBY_MODEL || 'accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new';
-    if (!apiKey) return res.status(500).json({ error: 'Missing FIREWORK_API_KEY' });
+    
+    if (!apiKey) {
+      console.error('FIREWORK_API_KEY missing');
+      return res.status(500).json({ error: 'Missing FIREWORK_API_KEY' });
+    }
 
     let prompt;
     if (req.method === 'POST') {
-      // In Vercel, body is already parsed if Content-Type is application/json
       let body = req.body;
       if (typeof body === 'string') {
         try {
@@ -39,7 +42,9 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Missing or empty prompt parameter' });
     }
 
-    const r = await fetch('https://api.fireworks.ai/inference/v1/chat/completions', {
+    console.log('Getting recommendations for prompt:', prompt.substring(0, 100) + '...');
+    
+    const response = await fetch('https://api.fireworks.ai/inference/v1/chat/completions', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -54,12 +59,20 @@ module.exports = async (req, res) => {
       }),
     });
 
-    const data = await r.json();
-    if (!r.ok) {
-      return res.status(r.status).json({ error: 'Model API error', details: data });
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('Fireworks API error:', data);
+      return res.status(response.status).json({ 
+        error: 'Model API error', 
+        details: data 
+      });
     }
+    
+    console.log('Recommendations generated successfully');
     res.status(200).json(data);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to get recommendations' });
+  } catch (error) {
+    console.error('Recommendation error:', error);
+    res.status(500).json({ error: 'Failed to get recommendations', details: error.message });
   }
-};
+}
